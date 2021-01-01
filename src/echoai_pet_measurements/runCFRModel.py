@@ -13,6 +13,7 @@ from tensorflow.keras.models import load_model
 
 from echoai_pet_measurements.TFRprovider import DatasetProvider
 from echoai_pet_measurements.processing import Videoconverter
+from echoai_pet_measurements.Modeltrainer_Inc2 import VideoTrainer
 
 #%% Video selection and model parameters
 
@@ -107,8 +108,12 @@ def predict_from_array_list(model, model_dict, feature_dict, array_list, batch_s
 def runCFRModel(data, frame_time_ms, deltaX, deltaY):
 
     # Load model from checkpoint
-    checkpoint_file = os.path.join(project_dir, 'checkpoint.h5')
-    model = load_model(checkpoint_file)
+    #checkpoint_file = os.path.join(project_dir, 'checkpoint.h5')
+    #model = load_model(checkpoint_file)
+
+    # Alternatively, initialize new model weights
+    VT = VideoTrainer(log_dir=None, model_dict=model_dict, train_dict=train_dict, feature_dict=feature_dict)
+    model = VT.compile_inc2model()
 
     VC = Videoconverter(max_frame_time_ms=max_frame_time_ms, min_frames=min_frames, meta_df=None)
     error, im = VC.process_data(data=data,
