@@ -10,7 +10,9 @@ from scipy.stats import spearmanr
 pd.set_option('display.max_rows', 50)
 pd.set_option('display.max_columns', 100)
 pd.set_option('display.width', 1000)
-
+"""
+This file is part of the echoAI-PET-measurements project.
+"""
 import tensorflow as tf
 from tensorflow.keras.callbacks import ModelCheckpoint, TensorBoard, Callback
 from tensorflow.keras.models import load_model
