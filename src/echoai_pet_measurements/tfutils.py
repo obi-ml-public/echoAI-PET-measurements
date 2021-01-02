@@ -1,4 +1,7 @@
-""" Some useful TF functions """
+""""
+This file is part of the echoAI-PET-measurements project.
+"""
+
 import os
 import tensorflow as tf
 
