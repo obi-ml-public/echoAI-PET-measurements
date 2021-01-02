@@ -1,20 +1,13 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
-Created on Fri Oct 12 23:24:38 2018
-
-Some helper functions for processing noMNIST data sets
-
-@author: andy
+This file is part of the echoAI-PET-measurements project.
 """
+
 #%% Imports
 import os
 import sys
 import numpy as np
 import tensorflow as tf
 import tensorflow_addons as tfa
-from pdb import set_trace
-from tensorflow.keras.applications.inception_v3 import preprocess_input as preprocV3
 
 #%% Functions and classes
 
