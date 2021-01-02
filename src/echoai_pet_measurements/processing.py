@@ -1,4 +1,6 @@
-
+"""
+This file is part of the echoAI-PET-measurements project.
+"""
 import os
 import numpy as np
 import cv2
