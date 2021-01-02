@@ -1,6 +1,5 @@
 """
-Model predictions from checkpoint file
-Compile all data as .npy array and expand into memory
+This file is part of the echoAI-PET-measurements project.
 """
 
 #%% Imports
