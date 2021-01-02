@@ -1,7 +1,10 @@
+"""
+This file is part of the echoAI-PET-measurements project.
+"""
+
 import os
 import tensorflow as tf
 from tensorflow.keras.initializers import glorot_uniform, Zeros
-
 
 from tensorflow.keras import layers, Model
 from tensorflow.keras.layers import (BatchNormalization, Conv3D, MaxPooling3D, Dense,
