@@ -6,7 +6,6 @@ This file is part of the echoAI-PET-measurements project.
 
 import os
 import numpy as np
-
 import tensorflow as tf
 from tensorflow.keras.models import load_model
 
@@ -15,8 +14,6 @@ from echoai_pet_measurements.processing import Videoconverter
 from echoai_pet_measurements.Modeltrainer_Inc2 import VideoTrainer
 
 #%% Video selection and model parameters
-
-batch_size = 1
 
 # Project directory
 project_dir = os.path.join(os.environ['HOME'], 'data', 'cfrmodel')
@@ -47,8 +44,7 @@ feature_dict = \
     'array': ['image', 'shape'],
     'float': ['rest_global_mbf', 'stress_global_mbf', 'global_cfr_calc'],
     'int': ['record'],
-    'features': ['image', 'shape',
-    'rest_global_mbf', 'stress_global_mbf',
+    'features': ['image', 'shape', 'rest_global_mbf', 'stress_global_mbf',
     'global_cfr_calc', 'record']
     }
 
@@ -104,31 +100,50 @@ def predict_from_array_list(model, model_dict, feature_dict, array_list, batch_s
 
     return predict_list
 
-def runCFRModel(data, frame_time_ms, deltaX, deltaY):
+def runCFRModel(data_array_list,
+                frame_time_ms_list,
+                deltaX_list,
+                deltaY_list,
+                batch_size=1,
+                checkpoint_dict=None):
 
-    # Load model from checkpoint
-    #checkpoint_file = os.path.join(project_dir, 'checkpoint.h5')
-    #model = load_model(checkpoint_file)
+    assert len(data_array_list) == len(frame_time_ms_list) == len(deltaX_list) == len(deltaY_list)
 
-    # Alternatively, initialize new model weights
-    VT = VideoTrainer(log_dir=None, model_dict=model_dict, train_dict=train_dict, feature_dict=feature_dict)
-    model = VT.compile_inc2model()
+    if checkpoint_dict is None:
+        checkpoint_dict = {model_dict['model_output']: None}
 
-    VC = Videoconverter(max_frame_time_ms=max_frame_time_ms, min_frames=min_frames, meta_df=None)
-    error, im = VC.process_data(data=data,
-                                deltaX=deltaX,
-                                deltaY=deltaY,
-                                frame_time=frame_time_ms)
-    predictions=[]
+    # Process the videos
     image_array_list = []
-    if np.any(im):
-        image_array_list.append((im, np.asarray(im.shape, np.int32)))
-        predictions = predict_from_array_list(model=model,
-                                              model_dict=model_dict,
-                                              feature_dict=feature_dict,
-                                              array_list=image_array_list,
-                                              batch_size=batch_size)
-    else:
-        print(f'This video file does not qualify: {error}')
+    qualified_index_list = []
+    for data_idx in range(len(data_array_list)):
+        VC = Videoconverter(max_frame_time_ms=max_frame_time_ms, min_frames=min_frames, meta_df=None)
+        error, im = VC.process_data(data=data_array_list[data_idx],
+                                    deltaX=deltaX_list[data_idx],
+                                    deltaY=deltaY_list[data_idx],
+                                    frame_time=frame_time_ms_list[data_idx])
+        if np.any(im):
+            image_array_list.append((im, np.asarray(im.shape, np.int32)))
+            qualified_index_list.append(data_idx)
+        else:
+            print(f'Video data for index{data_idx} does not qualify: {error}')
 
-    return predictions
+    # Model loop
+    output_dict = {}
+    for model_output in checkpoint_dict.keys():
+        model_dict['model_output'] = model_output
+
+        if checkpoint_dict[model_output] is not None:
+            model = load_model(checkpoint_dict[model_output])
+        else:
+            print(f'No weights provided for {model_output}. Initializing new model.')
+            # Initialize a new model (just in case a checkpoint file is missing)
+            VT = VideoTrainer(log_dir=None, model_dict=model_dict, train_dict=train_dict, feature_dict=feature_dict)
+            model = VT.compile_inc2model()
+
+        output_dict[model_output] = predict_from_array_list(model=model,
+                                                            model_dict=model_dict,
+                                                            feature_dict=feature_dict,
+                                                            array_list=image_array_list,
+                                                            batch_size=batch_size)
+
+    return qualified_index_list, output_dict
