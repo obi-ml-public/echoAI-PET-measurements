@@ -38,10 +38,30 @@ deltaY = 0.03367
 ```
 Inference on the echocardiography video by calling the runCFRModel function
 ```
-predictions = runCFRModel(data=data,
-                          frame_time_ms=frame_time_ms,
-                          deltaX=deltaX,
-                          deltaY=deltaY)
+_, predictions = runCFRModel(data_array_list=[data],
+                             frame_time_ms_list=[frame_time_ms],
+                             deltaX_list=[deltaX],
+                             deltaY_list=[deltaY])
 ```
 Estimated time for 
 running the code on a single echo input: 5.4 seconds.
+
+If no weights are available, a new model with random weights is initialized.
+However, checkpoint files can be provided to the runCFRModel function in the
+form of a python dictionary {'model_response_variable': 'path_to_checkpoint_file'}.
+Furthermore, lists of numpy arrays can be provided to predict on a larger
+number of videos:
+
+```
+qualified_index_list, predictions = runCFRModel(data_array_list, 
+                                                frame_time_ms_list, 
+                                                deltaX_list, 
+                                                deltaY_list, 
+                                                checkpoint_dict,
+                                                batch_size=1)
+```
+
+The returned list *qualified_index_list* contains the video indices that
+of the echo videos that satisfied the minimum requirements, i.e. maximum frame_time
+and minimum length.
+
