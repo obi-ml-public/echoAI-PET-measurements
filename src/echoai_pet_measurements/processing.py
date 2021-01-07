@@ -14,10 +14,10 @@ class Videoconverter:
     """
     def __init__(self, max_frame_time_ms, min_frames, meta_df):
         self.max_frame_time = max_frame_time_ms
-        self.min_rate = 1/max_frame_time_ms*1e3
+        self.min_rate = 1/max_frame_time_ms*1e3 if max_frame_time_ms is not None else None
         self.min_frames = min_frames
         self.meta_df = meta_df
-        self.min_video_len = min_frames*max_frame_time_ms*1e-3
+        self.min_video_len = min_frames*max_frame_time_ms*1e-3 if max_frame_time_ms is not None else None
 
     def im_scale(self, im, dx, dy):
         """ convert single images to uint8 and resize by scale factors """
@@ -77,22 +77,15 @@ class Videoconverter:
 
         return subsampled_image_array
 
-    def load_video(self, filename):
-        meta = self.meta_df[self.meta_df.filename == filename]
-        data = None
-        if meta.shape[0] > 0:
-            deltaX = np.abs(meta.deltaX.values[0])
-            deltaY = np.abs(meta.deltaY.values[0])
-            if (0 < deltaX) & (deltaX < 1) & (0 < deltaY) & (deltaY < 1):
-                frame_time = meta.frame_time.values[0] * 1e-3
-                rate = 1 / frame_time
-                file = os.path.join(meta.dir.values[0], filename)
-                try:
-                    with lz4.frame.open(file, 'rb') as fp:
-                        data = np.load(fp)
-                except IOError as err:
-                    print('Cannot open npy file.')
-                    print(err)
+    def load_video(self, file):
+        """ Just load a video file """
+        try:
+            with lz4.frame.open(file, 'rb') as fp:
+                data = np.load(fp)
+        except IOError as err:
+            print('Cannot open npy file.')
+            print(err)
+            data = None
         return data
 
     def process_data(self, data, deltaX, deltaY, frame_time):
