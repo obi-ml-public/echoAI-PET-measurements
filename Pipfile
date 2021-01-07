@@ -9,6 +9,7 @@ pandas = "*"
 numpy = "*"
 opencv-python = "*"
 lz4 = "*"
+pyarrow = "*"
 
 [dev-packages]
 jupyter = "*"
