@@ -47,10 +47,16 @@ Estimated time for
 running the code on a single echo input: 5.4 seconds.
 
 If no weights are available, a new model with random weights is initialized.
-However, checkpoint files can be provided to the runCFRModel function in the
-form of a python dictionary {'model_response_variable': 'path_to_checkpoint_file'}.
-Furthermore, lists of numpy arrays can be provided to predict on a larger
-number of videos:
+However, checkpoint files can be provided to the *runCFRModel* function in the
+form of a python dictionary, where
+```
+checkpoint_dict = {'model_response_variable': 'path_to_checkpoint_file'}
+```
+ 
+Moreover, multiple videos can be provided to this function as lists. 
+The returned *qualified_index_list* contains the video indices of those
+videos that satisfied the minimum requirements (maximum frame_time
+and minimum length).
 
 ```
 qualified_index_list, predictions = runCFRModel(data_array_list, 
@@ -61,7 +67,5 @@ qualified_index_list, predictions = runCFRModel(data_array_list,
                                                 batch_size=1)
 ```
 
-The returned list *qualified_index_list* contains the video indices that
-of the echo videos that satisfied the minimum requirements, i.e. maximum frame_time
-and minimum length.
+
 
